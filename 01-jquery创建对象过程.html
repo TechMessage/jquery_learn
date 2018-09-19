@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<!-- 
+	1.jquery中所有的方法都是封装在原型对象上的，所以使用这些方法的套路
+	基本上就是创建jQuery对象，然后使用这些方法。
+
+	2. jQuery中创建对象的方式不是简单的new来创建的，每次都要new的话那么
+	使用起来显得不够简洁直观。
+
+	3. jQuery中创建对象是利用了工厂模式来创建对象，简单回忆一下js中对象的
+	创建方式有哪些？
+		1. 直接使用对象字面值{}
+		2. new + 构造函数
+		3. 工厂模式
+
+
+ -->
+<body>
+	<script type="text/javascript">
+		//1.jQuery是一个函数，它内部执行了new + 函数的操作就会创建一个对象
+		//该对象的类型是init类型的
+		var jQuery = function (selector, context) {
+			return new jQuery.fn.init(selector, context); //工厂模式
+		}
+
+		//2. jQuery是一个函数同时也是对象，在其内部添加fn属性，这个属性指向jQuery函数的
+		//原型对象，继而可以访问通过jQuery.fn访问到原型对象，关键点在于步骤1中init函数
+		//它是作为jQuery的原型对象里的一个属性存在的，也就是说通过jQuery是可以找到init函数
+		//的，封装性更好了，集合所有的属性包括方法都是基于jQuery这个函数也是对象。
+		jQuery.fn = jQuery.prototype = {
+			init: function (selector, context) {
+				
+			},
+		}
+
+		//3. 关键点，步骤1中工厂模式创建的对象严格意义上讲不是jQuery类型的，而是init类型的实例
+		//因为new 操作的是init函数，那么创建出来的实例对象是可以访问到init原型对象的，而我们的目的
+		//是要这个实例对象可以访问到jQuery原型的，因为所有的方法都是要封装到jQuery原型对象上的，此
+		//时将init的原型指向jQuery的原型就可以解决了上述问题。至此，通过jQuery函数创建了init实例对象，
+		//该实例对象又可以通过原型链的关系访问到jQuery原型对象。 
+		jQuery.fn.init.prototype = jQuery.fn;
+
+
+		// 4. 测试，给jQuery原型添加方法
+		jQuery.fn.say = function () {
+			console.log('say from jQuery.prototype');
+		}
+		
+		var jq1 = jQuery();
+		console.log(jq1);
+		jq1.say();
+
+
+		/**
+		 * 总结： 
+		 * 1. jQuery创建对象采用了工厂模式。
+		 * 2. 工厂内部使用new + 函数创建实例，而函数又是作为jQuery原型对象的一个属性。  
+		 * 3. 在原型处理上使用了原型替换的方式，这样解决了init实例对象访问jQuery原型对象的问题。
+		 */
+	</script>
+</body>
+</html>
